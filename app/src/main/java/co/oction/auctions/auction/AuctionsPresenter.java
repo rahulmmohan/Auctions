@@ -1,7 +1,6 @@
 package co.oction.auctions.auction;
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import java.util.List;
 
@@ -29,18 +28,25 @@ public class AuctionsPresenter implements AuctionsContract.Presenter {
 
 
     @Override
-    public void loadAuctions(AuctionsType auctionsType) {
+    public void loadAuctions() {
+        mAuctionsView.setLoadingIndicator(true);
 
         Call<List<AuctionResponse>> call = apiService.getAuctionsList();
         call.enqueue(new Callback<List<AuctionResponse>>() {
             @Override
             public void onResponse(Call<List<AuctionResponse>> call, Response<List<AuctionResponse>> response) {
-                mAuctionsView.showAuctions(response.body());
+                if (response.body() != null && !response.body().isEmpty()) {
+                    mAuctionsView.showAuctions(response.body());
+                } else {
+                    mAuctionsView.showNoAuctions();
+                }
+                mAuctionsView.setLoadingIndicator(false);
             }
 
             @Override
             public void onFailure(Call<List<AuctionResponse>> call, Throwable t) {
-
+                mAuctionsView.showNoAuctions();
+                mAuctionsView.setLoadingIndicator(false);
             }
         });
 

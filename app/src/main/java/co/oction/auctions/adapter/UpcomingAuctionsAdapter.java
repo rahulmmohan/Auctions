@@ -26,12 +26,10 @@ import co.oction.auctions.data.model.Medium;
 public class UpcomingAuctionsAdapter extends RecyclerView.Adapter<UpcomingAuctionsAdapter.AuctionViewHolder> {
 
     private List<AuctionResponse> auctions;
-    private int rowLayout;
     private Context context;
 
     public UpcomingAuctionsAdapter(List<AuctionResponse> auctions, Context context) {
         this.auctions = auctions;
-        this.rowLayout = rowLayout;
         this.context = context;
     }
 

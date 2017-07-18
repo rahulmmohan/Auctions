@@ -14,11 +14,14 @@ import co.oction.auctions.data.model.AuctionResponse;
 public interface AuctionsContract {
 
     interface View{
+        void setLoadingIndicator(boolean active);
+
+        void showNoAuctions();
 
         void showAuctions(List<AuctionResponse> auctionResponses);
     }
 
     interface Presenter{
-        void loadAuctions(AuctionsType auctionsType);
+        void loadAuctions();
     }
 }

@@ -26,7 +26,6 @@ import co.oction.auctions.data.model.Medium;
 public class CurrentAuctionsAdapter extends RecyclerView.Adapter<CurrentAuctionsAdapter.AuctionViewHolder> {
 
     private List<AuctionResponse> auctions;
-    private int rowLayout;
     private Context context;
 
     public CurrentAuctionsAdapter(List<AuctionResponse> auctions, Context context) {
