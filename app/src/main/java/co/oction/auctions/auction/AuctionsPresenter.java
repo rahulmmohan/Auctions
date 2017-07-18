@@ -2,6 +2,7 @@ package co.oction.auctions.auction;
 
 import android.support.annotation.NonNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import co.oction.auctions.data.ApiClient;
@@ -18,7 +19,7 @@ import retrofit2.Response;
 public class AuctionsPresenter implements AuctionsContract.Presenter {
 
     private final AuctionsContract.View mAuctionsView;
-    private ApiInterface apiService;
+    private final ApiInterface apiService;
 
     public AuctionsPresenter(@NonNull AuctionsContract.View view) {
 
@@ -28,7 +29,7 @@ public class AuctionsPresenter implements AuctionsContract.Presenter {
 
 
     @Override
-    public void loadAuctions() {
+    public void loadAuctions(final AuctionsType auctionsType) {
         mAuctionsView.setLoadingIndicator(true);
 
         Call<List<AuctionResponse>> call = apiService.getAuctionsList();
@@ -36,7 +37,12 @@ public class AuctionsPresenter implements AuctionsContract.Presenter {
             @Override
             public void onResponse(Call<List<AuctionResponse>> call, Response<List<AuctionResponse>> response) {
                 if (response.body() != null && !response.body().isEmpty()) {
-                    mAuctionsView.showAuctions(response.body());
+                    List<AuctionResponse> auctionResponses = filterAuctions(response.body(), auctionsType);
+                    if (auctionResponses.isEmpty()) {
+                        mAuctionsView.showNoAuctions();
+                    } else {
+                        mAuctionsView.showAuctions(auctionResponses);
+                    }
                 } else {
                     mAuctionsView.showNoAuctions();
                 }
@@ -50,5 +56,26 @@ public class AuctionsPresenter implements AuctionsContract.Presenter {
             }
         });
 
+    }
+
+    /**
+     * filter auctions based on the current or upcoming
+     *
+     * @param list
+     * @param auctionsType
+     * @return
+     */
+    private List<AuctionResponse> filterAuctions(List<AuctionResponse> list, AuctionsType auctionsType) {
+        List<AuctionResponse> auctionResponses = new ArrayList<>();
+        for (AuctionResponse auctionResponse : list) {
+            if (auctionsType == AuctionsType.CURRENT_AUCTIONS &&
+                    Long.parseLong(auctionResponse.auction.endTimeUnix) < System.currentTimeMillis()) {
+                auctionResponses.add(auctionResponse);
+            } else if (auctionsType == AuctionsType.UPCOMING_AUCTIONS &&
+                    Long.parseLong(auctionResponse.auction.startTimeUnix) > System.currentTimeMillis()) {
+                auctionResponses.add(auctionResponse);
+            }
+        }
+        return auctionResponses;
     }
 }

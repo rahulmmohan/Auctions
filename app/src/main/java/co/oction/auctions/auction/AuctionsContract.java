@@ -11,7 +11,7 @@ import co.oction.auctions.data.model.AuctionResponse;
 /**
  * This specifies the contract between the view and the presenter.
  */
-public interface AuctionsContract {
+interface AuctionsContract {
 
     interface View{
         void setLoadingIndicator(boolean active);
@@ -22,6 +22,6 @@ public interface AuctionsContract {
     }
 
     interface Presenter{
-        void loadAuctions();
+        void loadAuctions(AuctionsType auctionsType);
     }
 }

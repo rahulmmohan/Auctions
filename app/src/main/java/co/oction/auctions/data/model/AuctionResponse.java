@@ -17,5 +17,5 @@ public class AuctionResponse {
 
     @SerializedName("media")
     @Expose
-    public List<Medium> media = null;
+    public final List<Medium> media = null;
 }

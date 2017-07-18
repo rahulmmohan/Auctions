@@ -14,7 +14,7 @@ import co.oction.auctions.auction.AuctionsType;
 public class TabsPagerAdapter extends FragmentPagerAdapter {
 
     // Tab titles
-    private String[] tabs = { "CURRENT", "UPCOMING" };
+    private final String[] tabs = { "CURRENT", "UPCOMING" };
 
     public TabsPagerAdapter(FragmentManager fm) {
         super(fm);

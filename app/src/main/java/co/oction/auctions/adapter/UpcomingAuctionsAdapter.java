@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import co.oction.auctions.R;
 import co.oction.auctions.data.ApiClient;
@@ -25,8 +26,8 @@ import co.oction.auctions.data.model.Medium;
 
 public class UpcomingAuctionsAdapter extends RecyclerView.Adapter<UpcomingAuctionsAdapter.AuctionViewHolder> {
 
-    private List<AuctionResponse> auctions;
-    private Context context;
+    private final List<AuctionResponse> auctions;
+    private final Context context;
 
     public UpcomingAuctionsAdapter(List<AuctionResponse> auctions, Context context) {
         this.auctions = auctions;
@@ -42,14 +43,16 @@ public class UpcomingAuctionsAdapter extends RecyclerView.Adapter<UpcomingAuctio
 
 
     @Override
-    public void onBindViewHolder(AuctionViewHolder holder, final int position) {
+    public void onBindViewHolder(final AuctionViewHolder holder, final int position) {
         Auction auction = auctions.get(position).auction;
         Medium medium = auctions.get(position).media.get(0);
 
         holder.itemName.setText(auction.title);
-        holder.retailPrice.setText(String.format(context.getString(R.string.retail_price),auction.productCurrency+" "+auction.productPrice));
-        holder.startingDate.setText(auction.startTime);
-        Glide.with(context).load(ApiClient.BASE_URL+medium.media).into(holder.itemImageView);
+        holder.retailPrice.setText(String.format(context.getString(R.string.retail_price),
+                auction.productCurrency + " " + auction.productPrice));
+        holder.startingDate.setText(String.format(context.getString(R.string.start_time),
+                calculateTime(Long.parseLong(auction.startTimeUnix)-System.currentTimeMillis()/1000)));
+        Glide.with(context).load(ApiClient.BASE_URL + medium.media).into(holder.itemImageView);
 
     }
 
@@ -58,14 +61,22 @@ public class UpcomingAuctionsAdapter extends RecyclerView.Adapter<UpcomingAuctio
         return auctions.size();
     }
 
+    private String calculateTime(long seconds) {
+        int day = (int) TimeUnit.SECONDS.toDays(seconds);
+        long hours = TimeUnit.SECONDS.toHours(seconds) -
+                TimeUnit.DAYS.toHours(day);
+        long minute = TimeUnit.SECONDS.toMinutes(seconds) -
+                TimeUnit.HOURS.toMinutes(TimeUnit.SECONDS.toHours(seconds));
+        return day + "d " + hours + "hr " + minute + "min";
+    }
 
     public static class AuctionViewHolder extends RecyclerView.ViewHolder {
 
 
-        ImageView itemImageView;
-        TextView itemName;
-        TextView retailPrice;
-        TextView startingDate;
+        final ImageView itemImageView;
+        final TextView itemName;
+        final TextView retailPrice;
+        final TextView startingDate;
 
         public AuctionViewHolder(View v) {
             super(v);

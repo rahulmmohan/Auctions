@@ -8,16 +8,15 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
 import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import co.oction.auctions.R;
 import co.oction.auctions.adapter.CurrentAuctionsAdapter;
 import co.oction.auctions.adapter.UpcomingAuctionsAdapter;
 import co.oction.auctions.data.model.AuctionResponse;
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 public class AuctionsFragment extends Fragment implements AuctionsContract.View {
@@ -27,7 +26,7 @@ public class AuctionsFragment extends Fragment implements AuctionsContract.View 
 
     private AuctionsType auctionsType;
     private AuctionsPresenter auctionsPresenter;
-    private List<AuctionResponse> mAuctionResponses = new ArrayList<>();
+    private final List<AuctionResponse> mAuctionResponses = new ArrayList<>();
     private RecyclerView.Adapter adapter;
     private RecyclerView recyclerView;
     private TextView mNoAuctionView;
@@ -56,7 +55,7 @@ public class AuctionsFragment extends Fragment implements AuctionsContract.View 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            auctionsType = auctionsType.values()[getArguments().getInt(ARG_PARAM1)];
+            auctionsType = AuctionsType.values()[getArguments().getInt(ARG_PARAM1)];
         }
     }
 
@@ -65,9 +64,12 @@ public class AuctionsFragment extends Fragment implements AuctionsContract.View 
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_auctions, container, false);
+        //init presenter
         auctionsPresenter = new AuctionsPresenter(this);
+        //setting up recyclerview
         recyclerView = (RecyclerView) view.findViewById(R.id.auctions);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
         setAdapter();
         mNoAuctionView = (TextView) view.findViewById(R.id.noAuction);
         // Set up progress indicator
@@ -76,14 +78,16 @@ public class AuctionsFragment extends Fragment implements AuctionsContract.View 
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                auctionsPresenter.loadAuctions();
+                auctionsPresenter.loadAuctions(auctionsType);
             }
         });
 
         return view;
     }
 
-
+    /**
+     * set adapter wrt to auction type
+     */
     private void setAdapter() {
         if (auctionsType == AuctionsType.CURRENT_AUCTIONS) {
             adapter = new CurrentAuctionsAdapter(mAuctionResponses, getContext());
@@ -96,8 +100,8 @@ public class AuctionsFragment extends Fragment implements AuctionsContract.View 
     @Override
     public void onResume() {
         super.onResume();
-        if(mAuctionResponses.isEmpty()){
-            auctionsPresenter.loadAuctions();
+        if (mAuctionResponses.isEmpty()) {
+            auctionsPresenter.loadAuctions(auctionsType);
         }
     }
 
@@ -115,13 +119,16 @@ public class AuctionsFragment extends Fragment implements AuctionsContract.View 
             }
         });
     }
+
     @Override
     public void showNoAuctions() {
         recyclerView.setVisibility(View.GONE);
         mNoAuctionView.setVisibility(View.VISIBLE);
     }
+
     @Override
     public void showAuctions(List<AuctionResponse> auctionResponses) {
+        mAuctionResponses.clear();
         mAuctionResponses.addAll(auctionResponses);
         adapter.notifyDataSetChanged();
         recyclerView.setVisibility(View.VISIBLE);
